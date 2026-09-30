@@ -80,7 +80,7 @@ Error generating stack: `+u.message+`
       }
       var file=null;try{file=new File([text],name,{type:'application/json'});}catch(e){}
       if(isIOS()&&file&&navigator.canShare&&navigator.canShare({files:[file]})){
-        navigator.share({files:[file],title:name}).then(function(){say('Archivo listo ✓ (elegí "Guardar en Archivos")');},function(e){if(e&&e.name!=='AbortError')say('No se pudo compartir el archivo',true);});
+        navigator.share({files:[file]}).then(function(){say('Archivo listo ✓ (elegí "Guardar en Archivos")');},function(e){if(e&&e.name!=='AbortError')say('No se pudo compartir el archivo',true);});
       }else{
         var url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
         var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
