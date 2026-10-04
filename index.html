@@ -217,29 +217,94 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
     r3.appendChild(btn('Cerrar',false,close));card.appendChild(r3);
   }
 
+  var statsOpen=false;try{statsOpen=localStorage.getItem('ajustes10kStats')==='1';}catch(e){}
+  function ico(p){return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+p+'</svg>';}
+  var IC={
+    book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/>',
+    dice:'<rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/>',
+    undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+    save:'<path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7V3"/><rect x="7.5" y="13" width="9" height="6" rx="1"/>',
+    chart:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>',
+    chev:'<path d="m9 6 6 6-6 6"/>',
+    down:'<path d="m6 9 6 6 6-6"/>',
+    check:'<path d="m5 12 5 5 9-10"/>'
+  };
+  function section(title){
+    var t=T(),w=document.createElement('div');w.style.cssText='margin-top:18px;';
+    var h=document.createElement('div');h.textContent=title;h.style.cssText='font-size:12px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:'+t.muted+';margin:0 4px 8px;';
+    var box=document.createElement('div');box.style.cssText='border:1px solid '+t.border+';border-radius:16px;background:'+t.trackBg+';overflow:hidden;';
+    w.appendChild(h);w.appendChild(box);w.box=box;return w;
+  }
+  function item(box,icon,title,sub,onClick,opt){
+    opt=opt||{};var t=T(),b=document.createElement('button');b.type='button';
+    var first=!box.children.length;
+    b.style.cssText='font:inherit;width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:transparent;border:none;'+(first?'':'border-top:1px solid '+t.border+';')+'color:'+(opt.danger?'#E63946':t.text)+';text-align:left;cursor:'+(opt.disabled?'default':'pointer')+';touch-action:manipulation;-webkit-user-select:none;user-select:none;'+(opt.disabled?'opacity:.4;':'');
+    var ic=document.createElement('span');ic.innerHTML=ico(icon);ic.style.cssText='width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:'+t.text+';color:'+t.bg+';';
+    var tx=document.createElement('span');tx.style.cssText='flex:1;min-width:0;';
+    var a=document.createElement('span');a.textContent=title;a.style.cssText='display:block;font-size:15px;font-weight:700;';
+    tx.appendChild(a);
+    if(sub){var c=document.createElement('span');c.textContent=sub;c.style.cssText='display:block;font-size:12px;font-weight:500;color:'+t.muted+';margin-top:2px;line-height:1.3;';tx.appendChild(c);}
+    var ch=document.createElement('span');ch.innerHTML=ico(IC.chev);ch.style.cssText='color:'+t.muted+';flex-shrink:0;';
+    b.appendChild(ic);b.appendChild(tx);b.appendChild(ch);
+    b.addEventListener('click',function(){if(!opt.disabled)onClick();});
+    box.appendChild(b);return b;
+  }
   function openSettings(){
     var api=window.__t10k||{},t=T(),card=modal('Ajustes');
-    card.appendChild(label('Tema'));
-    var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;';
+
+    var sT=section('Tema');
+    var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;';
     (api.order||[]).forEach(function(k){
       var th=api.themes[k],cur=k===api.theme,b=document.createElement('button');b.type='button';
-      b.style.cssText='font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;cursor:pointer;border:2px solid '+(cur?t.text:t.border)+';background:'+th.bg+';color:'+th.text+';touch-action:manipulation;';
+      b.style.cssText='font:inherit;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:12px;cursor:pointer;border:'+(cur?'3px':'1px')+' solid '+(cur?t.text:t.border)+';background:'+th.bg+';color:'+th.text+';touch-action:manipulation;';
       var sw=document.createElement('div');sw.style.cssText='display:flex;gap:3px;';
       th.fills.slice(0,3).forEach(function(c){var d=document.createElement('span');d.style.cssText='width:12px;height:12px;border-radius:999px;background:'+c+';display:inline-block;';sw.appendChild(d);});
       var n=document.createElement('span');n.textContent=th.label;n.style.cssText='font-size:12px;font-weight:'+(cur?800:600)+';';
       b.appendChild(sw);b.appendChild(n);
+      if(cur){var ck=document.createElement('span');ck.innerHTML=ico(IC.check).replace('width="20" height="20"','width="12" height="12"');ck.style.cssText='position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:'+t.text+';color:'+t.bg+';';b.appendChild(ck);}
       b.addEventListener('click',function(){if(api.setTheme)api.setTheme(k);setTimeout(openSettings,30);});
       grid.appendChild(b);
     });
-    card.appendChild(grid);
-    card.appendChild(label('Estadísticas'));
+    sT.box.appendChild(grid);card.appendChild(sT);
+
+    var sA=section('Ayuda');
+    item(sA.box,IC.book,'Reglas del juego','Penalizaciones, especiales y campeonatos',function(){if(api.goReglas)api.goReglas();close();});
+    card.appendChild(sA);
+
+    var sP=section('Pruebas');
+    item(sP.box,IC.dice,'Llenar al azar','Reemplaza los tiros de la partida actual',function(){askC({title:'Llenar al azar',msg:'Se reemplazan los tiros de la partida actual por tiros aleatorios.',ok:'Llenar',danger:true},function(){if(api.fillRandom)api.fillRandom();close();});});
+    var can=!!(api.canUndoFill&&api.canUndoFill());
+    item(sP.box,IC.undo,'Deshacer llenado',can?'Vuelve tablero, récords y estadísticas':'No hay ningún llenado que deshacer',function(){askC({title:'Deshacer llenado',msg:'Vuelve el tablero, los récords y las estadísticas de campeonatos a como estaban antes del llenado al azar.',ok:'Deshacer'},function(){if(api.undoFill)api.undoFill();close();});},{disabled:!can});
+    card.appendChild(sP);
+
+    var sD=section('Datos');
+    item(sD.box,IC.save,'Copia de seguridad','Descargar o restaurar todos tus datos',function(){openBackup();});
+    card.appendChild(sD);
+
+    var sE=section('Estadísticas');
+    var hd=document.createElement('button');hd.type='button';
+    hd.style.cssText='font:inherit;width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;background:transparent;border:none;color:'+t.text+';text-align:left;cursor:pointer;touch-action:manipulation;';
+    var hi=document.createElement('span');hi.innerHTML=ico(IC.chart);hi.style.cssText='width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:'+t.text+';color:'+t.bg+';';
+    var ht=document.createElement('span');ht.style.cssText='flex:1;';
+    var h1=document.createElement('span');h1.textContent='Victorias, rachas y promedio';h1.style.cssText='display:block;font-size:15px;font-weight:700;';
+    var h2=document.createElement('span');h2.textContent=statsOpen?'Toca para plegar':'Toca para desplegar';h2.style.cssText='display:block;font-size:12px;font-weight:500;color:'+t.muted+';margin-top:2px;';
+    ht.appendChild(h1);ht.appendChild(h2);
+    var hc=document.createElement('span');hc.innerHTML=ico(IC.down);hc.style.cssText='color:'+t.muted+';flex-shrink:0;transition:transform .2s;'+(statsOpen?'transform:rotate(180deg);':'');
+    hd.appendChild(hi);hd.appendChild(ht);hd.appendChild(hc);
+    var body=document.createElement('div');body.style.display=statsOpen?'block':'none';
+    hd.addEventListener('click',function(){
+      statsOpen=!statsOpen;try{localStorage.setItem('ajustes10kStats',statsOpen?'1':'0');}catch(e){}
+      body.style.display=statsOpen?'block':'none';hc.style.transform=statsOpen?'rotate(180deg)':'none';h2.textContent=statsOpen?'Toca para plegar':'Toca para desplegar';
+      if(statsOpen)setTimeout(function(){try{body.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(e){}},30);
+    });
+    sE.box.appendChild(hd);
     (function(){
       var st=api.stats?api.stats():null;if(!st)return;
-      var box=document.createElement('div');box.style.cssText='margin-top:8px;border:1px solid '+t.border+';border-radius:12px;overflow:hidden;background:'+t.trackBg+';';
+      var tb=document.createElement('div');tb.style.cssText='border-top:1px solid '+t.border+';';
       function line(a,b,c,head){
-        var r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:1.5fr 1fr 1fr;align-items:center;padding:9px 12px;font-size:'+(head?'11px':'14px')+';'+(head?'font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:'+t.muted+';':'font-weight:600;color:'+t.text+';border-top:1px solid '+t.border+';');
+        var r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:1.5fr 1fr 1fr;align-items:center;padding:9px 14px;font-size:'+(head?'11px':'14px')+';'+(head?'font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:'+t.muted+';':'font-weight:600;color:'+t.text+';border-top:1px solid '+t.border+';');
         [a,b,c].forEach(function(v,i){var d=document.createElement('div');d.textContent=v;d.style.cssText=i?'text-align:center;font-weight:800;font-variant-numeric:tabular-nums;':'';if(i===0&&!head)d.style.color=t.muted;r.appendChild(d);});
-        box.appendChild(r);
+        tb.appendChild(r);
       }
       function fmt(v){return v===null||v===undefined?'—':String(v);}
       line('','Guido','Martín',true);
@@ -248,25 +313,14 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
       line('Racha actual',fmt(st.racha.guido),fmt(st.racha.martin));
       line('Mejor racha',fmt(st.mejor.guido),fmt(st.mejor.martin));
       line('Pts por tanda',fmt(st.prom.guido),fmt(st.prom.martin));
-      var nt=document.createElement('div');nt.textContent='Partidos jugados: '+st.jug+' · Empates: '+st.emp+'. El promedio por tanda se calcula con los partidos terminados desde ahora.';nt.style.cssText='margin-top:8px;font-size:12px;color:'+t.muted+';line-height:1.4;';
-      card.appendChild(box);card.appendChild(nt);
+      body.appendChild(tb);
+      var nt=document.createElement('div');nt.textContent='Partidos jugados: '+st.jug+' · Empates: '+st.emp+'. El promedio por tanda cuenta los partidos terminados desde ahora.';nt.style.cssText='padding:10px 14px 12px;font-size:12px;color:'+t.muted+';line-height:1.4;border-top:1px solid '+t.border+';';
+      body.appendChild(nt);
     })();
-    card.appendChild(label('Ayuda'));
-    var r=row();r.style.marginTop='8px';
-    r.appendChild(btn('Reglas del juego',false,function(){if(api.goReglas)api.goReglas();close();}));
-    card.appendChild(r);
-    card.appendChild(label('Pruebas'));
-    var rt=row();rt.style.marginTop='8px';
-    rt.appendChild(btn('Llenar al azar',false,function(){askC({title:'Llenar al azar',msg:'Se reemplazan los tiros de la partida actual por tiros aleatorios.',ok:'Llenar',danger:true},function(){if(api.fillRandom)api.fillRandom();close();});}));
-    var ub=btn('Deshacer llenado',false,function(){if(!(api.canUndoFill&&api.canUndoFill()))return;askC({title:'Deshacer llenado',msg:'Vuelve el tablero, los récords y las estadísticas de campeonatos a como estaban antes del llenado al azar.',ok:'Deshacer'},function(){if(api.undoFill)api.undoFill();close();});});
-    if(!(api.canUndoFill&&api.canUndoFill())){ub.style.opacity='0.4';ub.style.cursor='default';}
-    rt.appendChild(ub);card.appendChild(rt);
-    card.appendChild(label('Datos'));
-    var rb2=row();rb2.style.marginTop='8px';
-    rb2.appendChild(btn('Copia de seguridad',false,function(){openBackup();}));
-    card.appendChild(rb2);
-    var r3=row();r3.style.justifyContent='flex-end';r3.style.marginTop='18px';
-    r3.appendChild(btn('Cerrar',true,close));card.appendChild(r3);
+    sE.box.appendChild(body);card.appendChild(sE);
+
+    var r3=row();r3.style.justifyContent='stretch';r3.style.marginTop='20px';
+    var cb=btn('Cerrar',true,close);cb.style.flex='1';cb.style.padding='13px 18px';cb.style.fontSize='15px';r3.appendChild(cb);card.appendChild(r3);
   }
 
   function toast(msg,err){
