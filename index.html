@@ -415,7 +415,7 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
 </script><script id="t10-noscroll">
 (function(){
   function fits(){var d=document.documentElement;return d.scrollHeight<=window.innerHeight+2;}
-  function onPartida(){var a=window.__t10k;return a&&a.tab==="partida";}
+  function onPartida(){return true;}
   function inner(el){
     while(el&&el!==document.body&&el!==document.documentElement){
       if(el.nodeType===1){var cs=getComputedStyle(el),oy=cs.overflowY;
