@@ -253,6 +253,30 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
   function openSettings(){
     var api=window.__t10k||{},t=T(),card=modal('Ajustes');
 
+    var tiles=document.createElement('div');tiles.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;';
+    function tile(icon,label,onClick,disabled){
+      var b=document.createElement('button');b.type='button';
+      b.style.cssText='font:inherit;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px;border-radius:16px;border:1px solid '+t.border+';background:'+t.text+';color:'+t.bg+';cursor:'+(disabled?'default':'pointer')+';touch-action:manipulation;-webkit-user-select:none;user-select:none;'+(disabled?'opacity:.35;':'');
+      var ic=document.createElement('span');ic.innerHTML=ico(icon).replace('width="20" height="20"','width="26" height="26"');ic.style.cssText='display:flex;';
+      var tx=document.createElement('span');tx.textContent=label;tx.style.cssText='font-size:12px;font-weight:700;line-height:1.1;text-align:center;';
+      b.appendChild(ic);b.appendChild(tx);
+      b.addEventListener('click',function(){if(!disabled)onClick();});
+      tiles.appendChild(b);
+    }
+    tile(IC.dice,'Llenar al azar',function(){askC({title:'Llenar al azar',msg:'Se reemplazan los tiros de la partida actual por tiros aleatorios.',ok:'Llenar',danger:true},function(){if(api.fillRandom)api.fillRandom();close();});});
+    tile(IC.undo,'Deshacer llenado',function(){askC({title:'Deshacer llenado',msg:'Vuelve el tablero, los récords y las estadísticas de campeonatos a como estaban antes del llenado al azar.',ok:'Deshacer'},function(){if(api.undoFill)api.undoFill();close();});},!(api.canUndoFill&&api.canUndoFill()));
+    tile(IC.save,'Copia',function(){openBackup();});
+    tile(IC.refresh,'Refrescar',function(){
+      var go=function(){var u=location.pathname+'?v='+Date.now()+location.hash;location.replace(u);};
+      try{
+        var ps=[];
+        if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
+        if(window.caches&&caches.keys)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
+        Promise.all(ps).then(go,go);setTimeout(go,1500);
+      }catch(e){go();}
+    });
+    card.appendChild(tiles);
+
     var sT=section('Tema');
     var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;';
     (api.order||[]).forEach(function(k){
@@ -271,25 +295,6 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
     var sA=section('Ayuda');
     item(sA.box,IC.book,'Reglas del juego','Penalizaciones, especiales y campeonatos',function(){if(api.goReglas)api.goReglas();close();});
     card.appendChild(sA);
-
-    var sP=section('Pruebas');
-    item(sP.box,IC.dice,'Llenar al azar','Reemplaza los tiros de la partida actual',function(){askC({title:'Llenar al azar',msg:'Se reemplazan los tiros de la partida actual por tiros aleatorios.',ok:'Llenar',danger:true},function(){if(api.fillRandom)api.fillRandom();close();});});
-    var can=!!(api.canUndoFill&&api.canUndoFill());
-    item(sP.box,IC.undo,'Deshacer llenado',can?'Vuelve tablero, récords y estadísticas':'No hay ningún llenado que deshacer',function(){askC({title:'Deshacer llenado',msg:'Vuelve el tablero, los récords y las estadísticas de campeonatos a como estaban antes del llenado al azar.',ok:'Deshacer'},function(){if(api.undoFill)api.undoFill();close();});},{disabled:!can});
-    card.appendChild(sP);
-
-    var sD=section('Datos');
-    item(sD.box,IC.save,'Copia de seguridad','Descargar o restaurar todos tus datos',function(){openBackup();});
-    item(sD.box,IC.refresh,'Refrescar','Recarga la app con la última versión (no borra datos)',function(){
-      var go=function(){var u=location.pathname+'?v='+Date.now()+location.hash;location.replace(u);};
-      try{
-        var ps=[];
-        if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
-        if(window.caches&&caches.keys)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
-        Promise.all(ps).then(go,go);setTimeout(go,1500);
-      }catch(e){go();}
-    });
-    card.appendChild(sD);
 
     var sE=section('Estadísticas');
     var hd=document.createElement('button');hd.type='button';
