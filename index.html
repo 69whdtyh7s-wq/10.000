@@ -225,6 +225,7 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
     undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
     save:'<path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 3v5h7V3"/><rect x="7.5" y="13" width="9" height="6" rx="1"/>',
     chart:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>',
+    refresh:'<path d="M20 11a8 8 0 0 0-14.9-3"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 3"/><path d="M20 20v-4h-4"/>',
     chev:'<path d="m9 6 6 6-6 6"/>',
     down:'<path d="m6 9 6 6 6-6"/>',
     check:'<path d="m5 12 5 5 9-10"/>'
@@ -279,6 +280,15 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
 
     var sD=section('Datos');
     item(sD.box,IC.save,'Copia de seguridad','Descargar o restaurar todos tus datos',function(){openBackup();});
+    item(sD.box,IC.refresh,'Refrescar','Recarga la app con la última versión (no borra datos)',function(){
+      var go=function(){var u=location.pathname+'?v='+Date.now()+location.hash;location.replace(u);};
+      try{
+        var ps=[];
+        if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
+        if(window.caches&&caches.keys)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
+        Promise.all(ps).then(go,go);setTimeout(go,1500);
+      }catch(e){go();}
+    });
     card.appendChild(sD);
 
     var sE=section('Estadísticas');
