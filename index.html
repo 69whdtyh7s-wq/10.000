@@ -246,6 +246,18 @@ let NV=()=>a("div",{className:"t10-nav flex items-center gap-1 p-1 rounded-full 
     var rb2=row();rb2.style.marginTop='8px';
     rb2.appendChild(btn('Copia de seguridad',false,function(){openBackup();}));
     card.appendChild(rb2);
+    card.appendChild(label('App'));
+    var rf=row();rf.style.marginTop='8px';
+    rf.appendChild(btn('Actualizar app',false,function(){
+      if(navigator.onLine===false){toast('Sin conexión: no se puede actualizar',true);return;}
+      toast('Actualizando…');
+      var go=function(){location.reload();},pr=[];
+      try{if(window.caches)pr.push(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('tablero-10000-')===0;}).map(function(k){return caches.delete(k);}));}));}catch(e){}
+      try{if(navigator.serviceWorker)pr.push(navigator.serviceWorker.getRegistration().then(function(r){return r&&r.update();}));}catch(e){}
+      Promise.all(pr).then(go,go);
+      setTimeout(go,4000);
+    }));
+    card.appendChild(rf);
     var r3=row();r3.style.justifyContent='flex-end';r3.style.marginTop='18px';
     r3.appendChild(btn('Cerrar',true,close));card.appendChild(r3);
   }
